@@ -14,6 +14,12 @@ var motion = Vector2()
 
 var lifes = 3
 
+var jump_buffer = 0
+
+func _input(event):
+	if event.is_action_pressed("ui_accept"):
+		jump_buffer = 8
+
 func _physics_process(delta):
 	
 	motion.y += gravity
@@ -34,14 +40,18 @@ func _physics_process(delta):
 		friction = true
 	
 	if is_on_floor():
-		if Input.is_action_pressed("ui_accept"):
+		if jump_buffer > 0 or Input.is_action_pressed("ui_accept"):
 			motion.y = jumpHeight
+			jump_buffer = 0
 		if friction == true:
 			motion.x = lerp(motion.x ,0,0.5)
 	else:
 		if friction == true:
 			motion.x = lerp(motion.x,0,0.01)
 			
+	if jump_buffer > 0:
+		jump_buffer -= 1
+
 	motion = move_and_slide(motion,up)
 	
 	
