@@ -1,0 +1,15 @@
+# Normalize text files to LF in the repository
+* text=auto eol=lf
+
+# Binary files (never line-normalized)
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ogg   binary
+*.wav   binary
+*.mp3   binary
+*.ttf   binary
+*.otf   binary
+*.zip   binary
+*.pck   binary

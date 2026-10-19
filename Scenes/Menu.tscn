@@ -1,0 +1,79 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://Scripts/Menu.gd" type="Script" id=1]
+[ext_resource path="res://Rocky Roads/Deco/clouds2.png" type="Texture" id=2]
+[ext_resource path="res://Rocky Roads/Deco/clouds.3png.png" type="Texture" id=3]
+[ext_resource path="res://Rocky Roads/Backgrounds/desert_a.png" type="Texture" id=4]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.894118, 0.956863, 0.815686, 0.709804 )
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0.894118, 0.956863, 0.815686, 0.709804 )
+
+[node name="Menu" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -100.0
+margin_top = -11.0
+margin_right = 100.0
+margin_bottom = 33.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="DesertA" type="Sprite" parent="VBoxContainer"]
+position = Vector2( 103.375, -358 )
+scale = Vector2( 4.05957, 10.8652 )
+texture = ExtResource( 4 )
+
+[node name="StartGameButton" type="Button" parent="VBoxContainer"]
+margin_right = 200.0
+margin_bottom = 20.0
+custom_styles/focus = SubResource( 1 )
+text = "Start Game"
+
+[node name="QuitButton" type="Button" parent="VBoxContainer"]
+margin_top = 24.0
+margin_right = 200.0
+margin_bottom = 44.0
+custom_styles/focus = SubResource( 2 )
+text = "Quit"
+
+[node name="Clouds2" type="Sprite" parent="."]
+position = Vector2( 208, 71 )
+scale = Vector2( 8.08182, 9.57143 )
+texture = ExtResource( 2 )
+
+[node name="Clouds3" type="Sprite" parent="."]
+position = Vector2( 591, 135 )
+scale = Vector2( 8.08182, 9.57143 )
+texture = ExtResource( 2 )
+
+[node name="Clouds4" type="Sprite" parent="."]
+position = Vector2( 869, 54 )
+scale = Vector2( 8.08182, 9.57143 )
+texture = ExtResource( 2 )
+
+[node name="Clouds3Png" type="Sprite" parent="."]
+position = Vector2( 240, 201 )
+scale = Vector2( 7.25, 7.57692 )
+texture = ExtResource( 3 )
+
+[node name="Clouds3Png2" type="Sprite" parent="."]
+position = Vector2( 845, 229 )
+scale = Vector2( 7.25, 7.57692 )
+texture = ExtResource( 3 )
+
+[connection signal="pressed" from="VBoxContainer/StartGameButton" to="." method="_on_StartGameButton_pressed"]
+[connection signal="pressed" from="VBoxContainer/QuitButton" to="." method="_on_QuitButton_pressed"]

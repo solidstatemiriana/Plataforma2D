@@ -1,0 +1,106 @@
+name: Build iOS (unsigned IPA)
+
+# Builds an UNSIGNED .ipa on a GitHub-hosted macOS runner, so you do NOT need a
+# Mac. Download the artifact, then sideload it on your iPhone with a tool such as
+# Sideloadly or AltStore (Windows) using your own Apple ID.
+#
+# Free for public repositories. Private repos spend GitHub macOS minutes (10x).
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+env:
+  GODOT_VERSION: 3.4-stable
+  # Godot 3.x puts templates in a "3.4.stable" folder (dot, not dash).
+  GODOT_TPL_DIR: 3.4.stable
+  IOS_PRESET: iOS
+  # Must match the export binary name / Xcode project + scheme name.
+  APP_NAME: Plataforma2D
+  HOMEBREW_NO_AUTO_UPDATE: "1"
+
+jobs:
+  build-ios:
+    runs-on: macos-14
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Godot + iOS export template
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            godot
+            tpl
+          key: godot-${{ env.GODOT_VERSION }}-ios-template
+
+      - name: Download Godot editor (macOS)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          set -e
+          curl -L -o godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_osx.universal.zip"
+          unzip -q godot.zip -d godot
+
+      - name: Download iOS export template
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          set -e
+          curl -L -o templates.tpz \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_export_templates.tpz"
+          mkdir -p tpl
+          unzip -j -q templates.tpz "templates/iphone.zip" -d tpl
+
+      - name: Install iOS export template
+        run: |
+          dst="$HOME/Library/Application Support/Godot/templates/${GODOT_TPL_DIR}"
+          mkdir -p "$dst"
+          cp tpl/iphone.zip "$dst/"
+
+      - name: Export Xcode project
+        run: |
+          mkdir -p build/ios
+          # Godot 3.4 has NO "export project only" option. On macOS it writes the
+          # Xcode project first and then tries to code-sign + build the .ipa, which
+          # fails on a clean runner (there is no Apple account here). The project is
+          # already on disk by then, so we intentionally ignore the non-zero exit.
+          "godot/Godot.app/Contents/MacOS/Godot" --no-window --path . \
+            --export "${IOS_PRESET}" "build/ios/${APP_NAME}.ipa" || true
+          ls -la build/ios
+
+      - name: Verify Xcode project was generated
+        run: test -d "build/ios/${APP_NAME}.xcodeproj"
+
+      - name: Build unsigned archive
+        run: |
+          xcodebuild archive \
+            -project "build/ios/${APP_NAME}.xcodeproj" \
+            -scheme "${APP_NAME}" \
+            -sdk iphoneos \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            -archivePath "build/ios/App.xcarchive" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Package unsigned IPA
+        run: |
+          cd build/ios
+          mkdir -p Payload
+          cp -R App.xcarchive/Products/Applications/*.app Payload/
+          zip -qry "${APP_NAME}.ipa" Payload
+          ls -lh "${APP_NAME}.ipa"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-ipa
+          path: build/ios/${{ env.APP_NAME }}.ipa
+          retention-days: 30
