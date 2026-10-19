@@ -12,9 +12,11 @@ on:
     branches: [main, master]
 
 env:
-  GODOT_VERSION: 3.4-stable
-  # Godot 3.x puts templates in a "3.4.stable" folder (dot, not dash).
-  GODOT_TPL_DIR: 3.4.stable
+  # 3.4.4+ includes PR #58586 "[iOS] Fix multitouch not working correctly"
+  # (3.4.0 drops one finger when two on-screen buttons are held at once).
+  GODOT_VERSION: 3.4.4-stable
+  # Godot 3.x puts templates in a "3.4.4.stable" folder (dot, not dash).
+  GODOT_TPL_DIR: 3.4.4.stable
   IOS_PRESET: iOS
   # Must match the export binary name / Xcode project + scheme name.
   APP_NAME: Plataforma2D
